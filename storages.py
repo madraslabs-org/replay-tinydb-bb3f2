@@ -2,10 +2,7 @@ from abc import ABCMeta, abstractmethod
 
 import os
 
-try:
-    import ujson as json
-except ImportError:
-    import json
+import yaml
 
 
 def touch(fname, times=None):
@@ -16,8 +13,6 @@ def touch(fname, times=None):
 class Storage(object):
     """
     A generic storage for TinyDB.
-
-    TODO: Better docs!
     """
     __metaclass__ = ABCMeta
 
@@ -30,43 +25,38 @@ class Storage(object):
         raise NotImplementedError('To be overriden!')
 
 
-class JSONStorage(Storage):
+class YAMLStorage(Storage):
     """
-    Store the data in a JSON file.
+    Store the data in a YAML file.
     """
+    # TODO: Add caching
 
     def __init__(self, path):
-        super(JSONStorage, self).__init__()
+        super(YAMLStorage, self).__init__()
         touch(path)  # Create file if not exists
-        self.path = path
         self._handle = open(path, 'r+')
-
-    def __del__(self):
-        self._handle.close()
 
     def write(self, data):
         self._handle.seek(0)
-        json.dump(data, self._handle)
+        yaml.dump(data, self._handle)
         self._handle.flush()
 
     def read(self):
         self._handle.seek(0)
-        return json.load(self._handle)
+        return yaml.load(self._handle)
 
 
 class MemoryStorage(Storage):
     """
-    Store the data as JSON in memory.
+    Store the data as YAML in memory.
     """
 
     def __init__(self, path=None):
         super(MemoryStorage, self).__init__()
-        self.memory = None
+        self.memory = ''
 
     def write(self, data):
-        self.memory = data
+        self.memory = yaml.dump(data)
 
     def read(self):
-        if self.memory is None:
-            raise ValueError
-        return self.memory
+        return yaml.load(self.memory)
