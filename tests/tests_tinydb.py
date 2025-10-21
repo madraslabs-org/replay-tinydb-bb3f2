@@ -8,7 +8,7 @@ db = None
 
 def setup():
     global db
-    db = TinyDB(storage=MemoryStorage)
+    db = TinyDB('<memory>', storage=MemoryStorage)
 
 
 def test_purge():
